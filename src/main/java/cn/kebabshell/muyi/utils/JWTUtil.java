@@ -4,7 +4,9 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.context.annotation.Bean;
 
+import java.beans.JavaBean;
 import java.util.Date;
 
 /**
@@ -17,7 +19,7 @@ public class JWTUtil {
 
     /**
      * 生成Token
-     * 内容为username，密钥为密码
+     * 内容为username
      * @param username
      * @return
      */

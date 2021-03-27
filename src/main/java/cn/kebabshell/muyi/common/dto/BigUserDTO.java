@@ -1,8 +1,11 @@
 package cn.kebabshell.muyi.common.dto;
 
+import cn.kebabshell.muyi.common.entity.AuthUser;
 import cn.kebabshell.muyi.common.entity.UserBase;
 import cn.kebabshell.muyi.common.entity.UserDtl;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @program: muyi-server
@@ -12,7 +15,10 @@ import lombok.Data;
  **/
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class BigUserDTO {
+    private AuthUser authUser;
     private UserBase userBase;
     private UserDtl userDtl;
 }

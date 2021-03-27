@@ -14,7 +14,8 @@ public enum ResultCode {
     ERROR(20007, "错误"),
     ILLEGAL_USER(20008, "用户已被封禁"),
     NO_PIC(20009, "图片不存在"),
-    NO_USER(20001, "用户不存在");
+    NO_USER(20001, "用户不存在"),
+    REPEATED_USER(10002, "用户名重复");
 
     // 结果状态码
     private Integer code;

@@ -4,11 +4,18 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="cn.kebabshell.muyi.common.entity.HitBase">
-        <id column="id" property="id" />
-        <result column="hit_pic_id" property="hitPicId" />
-        <result column="hit_user_id" property="hitUserId" />
-        <result column="gmt_create" property="gmtCreate" />
-        <result column="gmt_modified" property="gmtModified" />
+        <id column="id" property="id"/>
+        <result column="hit_pic_id" property="hitPicId"/>
+        <result column="hit_user_id" property="hitUserId"/>
+        <result column="gmt_create" property="gmtCreate"/>
+        <result column="gmt_modified" property="gmtModified"/>
     </resultMap>
 
+    <select id="getHotHit" resultType="cn.kebabshell.muyi.common.dto.HotHitDTO">
+        SELECT hit_user_id as uid,
+               COUNT(*) as num
+        FROM `hit_base`
+        GROUP BY uid
+        ORDER BY num desc
+    </select>
 </mapper>
