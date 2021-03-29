@@ -18,4 +18,11 @@
         GROUP BY uid
         ORDER BY num desc
     </select>
+    <select id="getHotPicHit" resultType="cn.kebabshell.muyi.common.dto.HotHitPicDTO">
+        SELECT hit_pic_id as pid,
+               COUNT(*) as num
+        FROM `hit_base`
+        GROUP BY pid
+        ORDER BY num desc
+    </select>
 </mapper>

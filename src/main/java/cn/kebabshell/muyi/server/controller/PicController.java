@@ -66,11 +66,12 @@ public class PicController {
     /**
      * 拿到一些分类组合的图片
      * @param sortName 分类数组
+     * @param pageNum 页码
      * @param count 拿的数目
      * @return List<SmallPicDTO>
      */
     @GetMapping("/hm/sort")
-    MyResult getSortPic(String[] sortName, int count){
+    MyResult getSortPic(String[] sortName, int pageNum, int count){
         return new MyResult(
                 ResultCode.SUCCESS.getCode(),
                 MyMsg.SUCCESS.getMsg(),
@@ -114,7 +115,7 @@ public class PicController {
     @PostMapping("/add")
     public MyResult addPic(BigPicDTO bigPicDTO, MultipartFile file) {
         FileSave fileSave = new FileSave();
-        String path = fileSave.save(file);
+        // String path = fileSave.save(file);
         return new MyResult(
                 ResultCode.SUCCESS.getCode(),
                 MyMsg.SUCCESS.getMsg(),

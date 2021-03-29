@@ -3,12 +3,9 @@ package cn.kebabshell.muyi.server.controller;
 import cn.kebabshell.muyi.common.dto.BigUserDTO;
 import cn.kebabshell.muyi.common.dto.CtrlServiceDTO;
 import cn.kebabshell.muyi.common.entity.AuthUser;
-import cn.kebabshell.muyi.handler.MyExceptionHandler;
-import cn.kebabshell.muyi.handler.result.MyMsg;
 import cn.kebabshell.muyi.handler.result.MyResult;
 import cn.kebabshell.muyi.handler.result.ResultCode;
 import cn.kebabshell.muyi.service.UserService;
-import cn.kebabshell.muyi.utils.JWTUtil;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +34,7 @@ public class UserController {
      * @return List<UserBase>
      */
     @GetMapping("/hm/hot")
-    MyResult getAuthor(int count){
+    MyResult getHotAuthor(int count){
         return new MyResult(
                 ResultCode.SUCCESS, service.getHotAuthor(count));
     }

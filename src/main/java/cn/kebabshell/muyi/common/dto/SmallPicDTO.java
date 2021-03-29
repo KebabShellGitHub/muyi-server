@@ -1,8 +1,13 @@
 package cn.kebabshell.muyi.common.dto;
 
+import cn.kebabshell.muyi.common.entity.CategoryBase;
 import cn.kebabshell.muyi.common.entity.PicBase;
 import cn.kebabshell.muyi.common.entity.UserBase;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
  * @program: muyi-server
@@ -11,10 +16,11 @@ import lombok.Data;
  * @create: 2021-03-26 18:05
  **/
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class SmallPicDTO {
     private PicBase pic;
     private UserBase author;
-    private Integer hitCount;
-    private Integer likeCount;
-    private Integer CommentCount;
+    private PicStatisticDTO statistic;
+    private List<CategoryBase> categoryBaseList;
 }

@@ -48,6 +48,9 @@ public interface UserService {
      */
     Boolean ben(Integer benId);
 
+
+    // 查
+
     /**
      * 如果是自己，就不需要id，如果是别人，就要
      * @param userId

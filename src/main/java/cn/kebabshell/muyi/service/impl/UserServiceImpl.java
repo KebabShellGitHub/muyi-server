@@ -12,10 +12,13 @@ import cn.kebabshell.muyi.common.mapper.UserBaseMapper;
 import cn.kebabshell.muyi.common.mapper.UserDtlMapper;
 import cn.kebabshell.muyi.service.UserService;
 import cn.kebabshell.muyi.utils.JWTUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @program: muyi-server
@@ -41,6 +45,8 @@ public class UserServiceImpl implements UserService {
     private AuthUserMapper authUserMapper;
     @Autowired
     private HitBaseMapper hitBaseMapper;
+    @Autowired
+    private StringRedisTemplate template;
 
 
     @Override
@@ -208,6 +214,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserBase> getHotAuthor(int count) {
+        String listStr;
+        if ((listStr = template.opsForValue().get("list:author:hot")) != null){
+            return JSONObject.parseArray(listStr, UserBase.class);
+        }
         LinkedList<UserBase> userBases = new LinkedList<>();
         List<HotHitDTO> list = hitBaseMapper.getHotHit(new Page<>(1, count)).getRecords();
         for (HotHitDTO hit : list) {
@@ -215,7 +225,7 @@ public class UserServiceImpl implements UserService {
             userBaseQueryWrapper.eq("user_id", hit.getUid());
             userBases.push(userBaseMapper.selectList(userBaseQueryWrapper).get(0));
         }
-
+        template.opsForValue().set("list:author:hot", JSON.toJSONString(userBases), 300, TimeUnit.SECONDS);
         return userBases;
     }
 

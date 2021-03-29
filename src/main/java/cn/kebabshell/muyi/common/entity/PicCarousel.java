@@ -11,31 +11,28 @@ import lombok.EqualsAndHashCode;
 
 /**
  * <p>
- * 图片分类表
+ * 幻灯片图片
  * </p>
  *
  * @author kebabshell
- * @since 2021-03-26
+ * @since 2021-03-29
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-@ApiModel(value="PicCategory对象", description="图片分类表")
-public class PicCategory implements Serializable {
+@ApiModel(value="PicCarousel对象", description="幻灯片图片")
+public class PicCarousel implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value = "主键id")
+    @ApiModelProperty(value = "id")
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
     @ApiModelProperty(value = "图片id")
     private Integer picId;
 
-    @ApiModelProperty(value = "分类id")
-    private Integer categoryId;
-
-    @ApiModelProperty(value = "分类名")
-    private String categoryName;
+    @ApiModelProperty(value = "原图")
+    private String picUrl;
 
     @ApiModelProperty(value = "创建日期")
     private LocalDateTime gmtCreate;
