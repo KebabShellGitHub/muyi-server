@@ -6,15 +6,18 @@ import cn.kebabshell.muyi.common.mapper.*;
 import cn.kebabshell.muyi.config.MyStaticConfig;
 import cn.kebabshell.muyi.service.PicService;
 import cn.kebabshell.muyi.utils.FileSave;
+import cn.kebabshell.muyi.utils.JWTUtil;
 import cn.kebabshell.muyi.utils.ThumbnailsUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import net.coobird.thumbnailator.geometry.Positions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,7 +31,7 @@ import java.util.concurrent.TimeUnit;
  * @author: KebabShell
  * @create: 2021-03-29 14:57
  **/
-
+@Service
 public class PicServiceImpl implements PicService {
     private static Logger log = LoggerFactory.getLogger(Exception.class);
     @Autowired
@@ -201,15 +204,28 @@ public class PicServiceImpl implements PicService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean addPic(BigPicDTO bigPicDTO, MultipartFile file) {
+        // 图片名，保存在MyStaticConfig.FOLDER_PIC
         String picFileName = FileSave.save(file, MyStaticConfig.FOLDER_PIC);
+        // 保存缩略图，在MyStaticConfig.FOLDER_PIC_THUMB
         ThumbnailsUtil.changeScale(
                 MyStaticConfig.DIR + MyStaticConfig.FOLDER_PIC + picFileName,
                 0.5,
-                MyStaticConfig.DIR + MyStaticConfig.FOLDER_PIC_THUMB + picFileName);
+                MyStaticConfig.DIR + MyStaticConfig.FOLDER_PIC_THUMB + picFileName
+        );
+        // 保存原图水印，在MyStaticConfig.FOLDER_PIC_WATERMARK
+        ThumbnailsUtil.watermark(
+                MyStaticConfig.DIR + MyStaticConfig.FOLDER_PIC + picFileName,
+                Positions.BOTTOM_RIGHT,
+                MyStaticConfig.FILE_WATERMARK,
+                0.5f,
+                MyStaticConfig.DIR + MyStaticConfig.FOLDER_PIC_WATERMARK + picFileName
+        );
         PicBase picBase = bigPicDTO.getPicBase();
+        // 数据库保存缩略图路径
         picBase.setPicThumbUrl(MyStaticConfig.FOLDER_PIC_THUMB + picFileName);
         PicDtl picDtl = bigPicDTO.getPicDtl();
-        picDtl.setPicUrl(MyStaticConfig.FOLDER_PIC + picFileName);
+        // 数据库保存水印原图路径
+        picDtl.setPicUrl(MyStaticConfig.FOLDER_PIC_WATERMARK + picFileName);
         picBaseMapper.insert(picBase);
         picDtlMapper.insert(picDtl);
 
@@ -217,8 +233,23 @@ public class PicServiceImpl implements PicService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean delPic(String token, Long picId) {
-        return null;
+        String userName = JWTUtil.getUserName(token);
+        QueryWrapper<UserBase> userBaseQueryWrapper = new QueryWrapper<>();
+        userBaseQueryWrapper.eq("user_name", userName);
+        List<UserBase> list = userBaseMapper.selectList(userBaseQueryWrapper);
+        if (list == null || list.size() == 0)
+            return false;
+        Integer userId = list.get(0).getId();
+        PicBase pic = picBaseMapper.selectById(picId);
+        if (!pic.getPicAuthorId().equals(userId))
+            return false;
+
+        // 开始删除（只是把删除字段置为true）
+        pic.setIsDeleted(true);
+        picBaseMapper.updateById(pic);
+        return true;
     }
 
     private PicStatisticDTO getPicStatistic(Integer picId){

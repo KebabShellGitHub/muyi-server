@@ -5,8 +5,12 @@ import cn.kebabshell.muyi.common.dto.SimplePicDTO;
 import cn.kebabshell.muyi.handler.result.MyMsg;
 import cn.kebabshell.muyi.handler.result.MyResult;
 import cn.kebabshell.muyi.handler.result.ResultCode;
+import cn.kebabshell.muyi.service.PicService;
 import cn.kebabshell.muyi.utils.FileSave;
 import cn.kebabshell.muyi.utils.JWTUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +29,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/pic")
 public class PicController {
+    private static Logger log = LoggerFactory.getLogger(PicController.class);
+    @Autowired
+    private PicService service;
     /**
      * 拿到走马灯（幻灯片）的一组图片
      * @param count 图片数量
@@ -32,10 +39,10 @@ public class PicController {
      */
     @GetMapping("/hm/car")
     MyResult getCarouselPic(int count){
+        log.info("getCarouselPic:count:" + count);
         return new MyResult(
-                ResultCode.SUCCESS.getCode(),
-                MyMsg.SUCCESS.getMsg(),
-                null);
+                ResultCode.SUCCESS,
+                service.getCarouselPic(count));
     }
 
     /**
@@ -45,10 +52,10 @@ public class PicController {
      */
     @GetMapping("/hm/hot")
     MyResult getHomeHotPic(int count){
+        log.info("getHomeHotPic:count:" + count);
         return new MyResult(
-                ResultCode.SUCCESS.getCode(),
-                MyMsg.SUCCESS.getMsg(),
-                null);
+                ResultCode.SUCCESS,
+                service.getHotPic(1, count));
     }
     /**
      * 拿到推荐图片（待定，有推荐算法）
@@ -57,6 +64,7 @@ public class PicController {
      */
     @GetMapping("/hm/rec")
     MyResult getRecommendPic(int count){
+        log.info("getRecommendPic:count:" + count);
         return new MyResult(
                 ResultCode.SUCCESS.getCode(),
                 MyMsg.SUCCESS.getMsg(),
@@ -72,10 +80,10 @@ public class PicController {
      */
     @GetMapping("/hm/sort")
     MyResult getSortPic(String[] sortName, int pageNum, int count){
+        log.info("getSortPic");
         return new MyResult(
-                ResultCode.SUCCESS.getCode(),
-                MyMsg.SUCCESS.getMsg(),
-                null);
+                ResultCode.SUCCESS,
+                service.getSortPic(sortName, pageNum, count));
     }
 
     /**
@@ -86,10 +94,10 @@ public class PicController {
      */
     @GetMapping("/hot/all")
     MyResult getHotPic(int pageNum, int count){
+        log.info("getHotPic");
         return new MyResult(
-                ResultCode.SUCCESS.getCode(),
-                MyMsg.SUCCESS.getMsg(),
-                null);
+                ResultCode.SUCCESS,
+                service.getHotPic(pageNum, count));
     }
 
     /**
@@ -100,10 +108,10 @@ public class PicController {
      */
     @GetMapping("/all")
     MyResult getAllPic(int pageNum, int count){
+        log.info("getAllPic");
         return new MyResult(
-                ResultCode.SUCCESS.getCode(),
-                MyMsg.SUCCESS.getMsg(),
-                null);
+                ResultCode.SUCCESS,
+                service.getAllPic(pageNum, count));
     }
 
     /**
@@ -114,12 +122,12 @@ public class PicController {
      */
     @PostMapping("/add")
     public MyResult addPic(BigPicDTO bigPicDTO, MultipartFile file) {
-        FileSave fileSave = new FileSave();
-        // String path = fileSave.save(file);
-        return new MyResult(
-                ResultCode.SUCCESS.getCode(),
-                MyMsg.SUCCESS.getMsg(),
-                null);
+        log.info("addPic:bigPicDTO:" + bigPicDTO);
+        Boolean add = service.addPic(bigPicDTO, file);
+        return add ?
+                new MyResult(ResultCode.SUCCESS)
+                :
+                new MyResult(ResultCode.ERROR);
     }
 
     /**
@@ -131,22 +139,17 @@ public class PicController {
     @GetMapping("/del")
     public MyResult delPic(HttpServletRequest request, Long picId) {
         String token = request.getHeader("Token");
+        log.info("delPic:picId:" + picId);
         if (token == null) {
             return new MyResult(ResultCode.NO_LOGIN, "请重新登录");
         }
-        String userName = JWTUtil.getUserName(token);
-        //User user = userService.findByName(userName);
-        //if (user == null) {
-        //    return new MyResult(ResultCode.NO_USER);
-        //} else if (!user.getEffective()) {
-        //    return new MyResult(ResultCode.ILLEGAL_USER);
-        //}
-        //return service.deletePic(user.getId(), picId) ?
-        //        new MyResult(ResultCode.SUCCESS) : new MyResult(ResultCode.ERROR);
-        return new MyResult(
-                ResultCode.SUCCESS.getCode(),
-                MyMsg.SUCCESS.getMsg(),
-                null);
+        Boolean del = service.delPic(token, picId);
+        if (del){
+            return new MyResult(ResultCode.ERROR);
+        }else {
+            return new MyResult(ResultCode.SUCCESS);
+        }
+
     }
 
 

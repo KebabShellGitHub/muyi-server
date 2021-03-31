@@ -10,6 +10,8 @@ import cn.kebabshell.muyi.common.mapper.AuthUserMapper;
 import cn.kebabshell.muyi.common.mapper.HitBaseMapper;
 import cn.kebabshell.muyi.common.mapper.PicCategoryMapper;
 import cn.kebabshell.muyi.common.mapper.UserBaseMapper;
+import cn.kebabshell.muyi.handler.result.MyResult;
+import cn.kebabshell.muyi.handler.result.ResultCode;
 import cn.kebabshell.muyi.service.UserService;
 import cn.kebabshell.muyi.utils.ThumbnailsUtil;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
@@ -129,6 +131,14 @@ class MuyiServerApplicationTests {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    void test7(){
+        AuthUser authUser = new AuthUser();
+        authUser.setUserName("test");
+        MyResult myResult = new MyResult(ResultCode.SUCCESS, authUser);
+        System.out.println(myResult.getData().toString());
     }
 
 }

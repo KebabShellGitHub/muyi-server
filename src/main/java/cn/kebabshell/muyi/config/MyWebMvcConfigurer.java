@@ -21,10 +21,10 @@ public class MyWebMvcConfigurer implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         //访问日志
-        registry.addInterceptor(getSysInterceptor()).addPathPatterns("/**");
+        // registry.addInterceptor(getSysInterceptor()).addPathPatterns("/**");
     }
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("pic/**").addResourceLocations("file:/E:/workSpaceResource/xia_fan/");
+        registry.addResourceHandler("pic/**").addResourceLocations("file:/E:/ProjectResource/muyi/");
     }
 }

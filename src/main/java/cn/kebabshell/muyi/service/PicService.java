@@ -60,8 +60,7 @@ public interface PicService {
     Boolean addPic(BigPicDTO bigPicDTO, MultipartFile file);
 
     /**
-     * 删除图片
-     * @param token
+     * 删除图片（只是把删除字段置为true）
      * @param picId
      * @return
      */

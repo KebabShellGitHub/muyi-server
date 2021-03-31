@@ -6,6 +6,7 @@ import cn.kebabshell.muyi.common.entity.AuthUser;
 import cn.kebabshell.muyi.handler.result.MyResult;
 import cn.kebabshell.muyi.handler.result.ResultCode;
 import cn.kebabshell.muyi.service.UserService;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +26,16 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/user")
 public class UserController {
-    private static Logger log = LoggerFactory.getLogger(Exception.class);
+    private static Logger log = LoggerFactory.getLogger(UserController.class);
     @Autowired
     private UserService service;
+
+    @GetMapping("/auth-test")
+    @RequiresRoles("root")
+    MyResult testAuth(){
+        log.info("auth-test success");
+        return new MyResult(ResultCode.SUCCESS);
+    }
     /**
      * 主页热门摄影师
      * @param count
@@ -35,6 +43,7 @@ public class UserController {
      */
     @GetMapping("/hm/hot")
     MyResult getHotAuthor(int count){
+        log.info("getHotAuthor");
         return new MyResult(
                 ResultCode.SUCCESS, service.getHotAuthor(count));
     }
@@ -44,12 +53,12 @@ public class UserController {
      * @param user 用户名密码
      * @return 只返回token，进入详情页再请求详细信息
      */
-    @PostMapping("login")
+    @PostMapping("/login")
     MyResult login(AuthUser user){
+        log.info("login");
         CtrlServiceDTO<String> login = service.login(user);
-
         if (login.getSuccess())
-            return new MyResult(ResultCode.SUCCESS, login.getData());
+            return new MyResult(ResultCode.SUCCESS.getCode(), ResultCode.SUCCESS.getMessage(), login.getData());
         else
             // 这个CtrlServiceDTO是无奈之举...不想改了
             return new MyResult(ResultCode.ERROR, login.getMsg());
@@ -62,6 +71,7 @@ public class UserController {
      */
     @PostMapping("/register")
     MyResult register(BigUserDTO user) {
+        log.info("register");
         // 失败返回错误信息（用户名重复）
         try {
             return new MyResult(ResultCode.SUCCESS, service.register(user));
@@ -80,6 +90,7 @@ public class UserController {
      */
     @PostMapping("/udp")
     MyResult update(BigUserDTO bigUserDTO, MultipartFile file, HttpServletRequest request){
+        log.info("update");
         String token = request.getHeader("Token");
         try {
             Boolean update = service.update(bigUserDTO, file, token);
@@ -89,6 +100,7 @@ public class UserController {
                 // 这里待定
                 return new MyResult(ResultCode.TOKEN_EXPIRED);
         } catch (Exception e) {
+            log.error(e.getMessage());
             return new MyResult(ResultCode.ERROR);
         }
     }
@@ -99,18 +111,17 @@ public class UserController {
      * @param delId
      * @return
      */
-    @PostMapping("/del")
-    @RequiresRoles("root")
-    MyResult del(Integer delId){
-
-        try {
-            service.del(delId);
-            return new MyResult(ResultCode.SUCCESS);
-        } catch (Exception e) {
-            log.warn(e.getMessage());
-        }
-        return new MyResult(ResultCode.ERROR);
-    }
+    // @PostMapping("/del")
+    // @RequiresRoles("root")
+    // MyResult del(Integer delId){
+    //     try {
+    //         service.del(delId);
+    //         return new MyResult(ResultCode.SUCCESS);
+    //     } catch (Exception e) {
+    //         log.warn(e.getMessage());
+    //     }
+    //     return new MyResult(ResultCode.ERROR);
+    // }
 
     /**
      * 封禁用户，图片保留，压力小点
@@ -118,8 +129,14 @@ public class UserController {
      * @return
      */
     @PostMapping("/ben")
+    @RequiresPermissions("all")
     MyResult ben(Integer benId){
-        return new MyResult(ResultCode.ERROR);
+        log.info("benId:" + benId);
+        return service.ben(benId) ?
+                new MyResult(ResultCode.SUCCESS)
+                :
+                new MyResult(ResultCode.ERROR);
+
 
     }
 

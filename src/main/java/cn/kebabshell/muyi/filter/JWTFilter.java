@@ -35,7 +35,6 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
                 return true;
             } catch (Exception e) {
                 //token 错误
-//                responseError(response, e.getMessage());
                 logger.warn("token error");
             }
         }

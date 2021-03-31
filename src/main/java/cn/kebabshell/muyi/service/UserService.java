@@ -4,10 +4,8 @@ import cn.kebabshell.muyi.common.dto.BigUserDTO;
 import cn.kebabshell.muyi.common.dto.CtrlServiceDTO;
 import cn.kebabshell.muyi.common.entity.AuthUser;
 import cn.kebabshell.muyi.common.entity.UserBase;
-import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface UserService {

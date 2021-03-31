@@ -12,6 +12,9 @@ public final class MyStaticConfig {
     public static String FOLDER_AVATAR_THUMB = "avatar-thumb/";
     public static String FOLDER_AVATAR = "avatar/";
     public static String FOLDER_PIC = "pic/";
+    public static String FOLDER_PIC_WATERMARK = "pic-watermark/";
+    public static String FILE_WATERMARK = "/E:/ProjectResource/muyi/watermark.png";
 
-    public static String DIR = "/E:/workSpaceResource/muyi/";
+
+    public static String DIR = "/E:/ProjectResource/muyi/";
 }
