@@ -2,7 +2,9 @@ package cn.kebabshell.muyi.common.dto;
 
 import cn.kebabshell.muyi.common.entity.PicBase;
 import cn.kebabshell.muyi.common.entity.PicDtl;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 上传
@@ -13,6 +15,8 @@ import lombok.Data;
  **/
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class BigPicDTO {
     private PicBase picBase;
     private PicDtl picDtl;

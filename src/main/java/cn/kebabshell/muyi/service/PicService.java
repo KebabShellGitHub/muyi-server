@@ -1,6 +1,7 @@
 package cn.kebabshell.muyi.service;
 
 import cn.kebabshell.muyi.common.dto.BigPicDTO;
+import cn.kebabshell.muyi.common.dto.PicStatisticDTO;
 import cn.kebabshell.muyi.common.dto.SimplePicDTO;
 import cn.kebabshell.muyi.common.dto.SmallPicDTO;
 import cn.kebabshell.muyi.common.entity.PicCarousel;
@@ -11,6 +12,9 @@ import java.util.List;
 
 public interface PicService {
 
+    BigPicDTO getOne(Integer picId);
+
+    PicStatisticDTO getPicStatisticInfo(Integer picId);
     /**
      * 拿到走马灯（幻灯片）的一组图片
      * @param count

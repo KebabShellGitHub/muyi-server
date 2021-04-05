@@ -67,7 +67,7 @@ public class CommentController {
      * @param count
      * @return
      */
-    @PostMapping("/get")
+    @GetMapping("/get")
     MyResult getComment(int picId, int pageNum, int count){
         return new MyResult(
                 ResultCode.SUCCESS,

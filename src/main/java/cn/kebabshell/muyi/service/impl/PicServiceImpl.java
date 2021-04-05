@@ -57,6 +57,21 @@ public class PicServiceImpl implements PicService {
     private CategoryBaseMapper categoryBaseMapper;
 
     @Override
+    public BigPicDTO getOne(Integer picId) {
+        QueryWrapper<PicDtl> picDtlQueryWrapper = new QueryWrapper<>();
+        picDtlQueryWrapper.eq("pic_id", picId);
+        return new BigPicDTO(
+                picBaseMapper.selectById(picId),
+                picDtlMapper.selectOne(picDtlQueryWrapper)
+        );
+    }
+
+    @Override
+    public PicStatisticDTO getPicStatisticInfo(Integer picId) {
+        return getPicStatistic(picId);
+    }
+
+    @Override
     public List<PicCarousel> getCarouselPic(int count) {
         return picCarouselMapper.selectList(null);
     }
@@ -291,10 +306,24 @@ public class PicServiceImpl implements PicService {
     }
     private List<CategoryBase> getCategoryList(Integer picId){
         // 拿到所属分类
-        QueryWrapper<CategoryBase> categoryBaseQueryWrapper = new QueryWrapper<>();
-        categoryBaseQueryWrapper
+        // QueryWrapper<CategoryBase> categoryBaseQueryWrapper = new QueryWrapper<>();
+        // categoryBaseQueryWrapper
+        //         .eq("pic_id", picId);
+        // return categoryBaseMapper.selectList(categoryBaseQueryWrapper);
+        QueryWrapper<PicCategory> picCategoryQueryWrapper = new QueryWrapper<>();
+        picCategoryQueryWrapper
                 .eq("pic_id", picId);
-        return categoryBaseMapper.selectList(categoryBaseQueryWrapper);
+        List<PicCategory> picCategories = picCategoryMapper.selectList(picCategoryQueryWrapper);
+
+        LinkedList<CategoryBase> res = new LinkedList<>();
+
+        for (PicCategory picCategory : picCategories) {
+            CategoryBase categoryBase = categoryBaseMapper.selectById(picCategory.getCategoryId());
+            if (categoryBase != null){
+                res.add(categoryBase);
+            }
+        }
+        return res;
     }
     private UserBase getUser(Integer userId){
         QueryWrapper<UserBase> userBaseQueryWrapper = new QueryWrapper<>();

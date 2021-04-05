@@ -161,7 +161,7 @@ public class UserController {
      * @param userId 如果是自己，就不需要id，如果是别人，就要
      * @return BigUserDTO
      */
-    @PostMapping("/get")
+    @GetMapping("/get")
     MyResult getUser(Integer userId, HttpServletRequest request){
         String token = request.getHeader("Token");
         CtrlServiceDTO<BigUserDTO> user = service.getUser(userId, token);

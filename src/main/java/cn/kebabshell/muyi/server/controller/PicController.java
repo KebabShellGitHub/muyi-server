@@ -32,6 +32,16 @@ public class PicController {
     private static Logger log = LoggerFactory.getLogger(PicController.class);
     @Autowired
     private PicService service;
+
+    @GetMapping("/one")
+    MyResult getOne(Integer picId){
+        return new MyResult(ResultCode.SUCCESS, service.getOne(picId));
+    }
+
+    @GetMapping("/statistic")
+    MyResult getPicStatistic(Integer picId){
+        return new MyResult(ResultCode.SUCCESS, service.getPicStatisticInfo(picId));
+    }
     /**
      * 拿到走马灯（幻灯片）的一组图片
      * @param count 图片数量
