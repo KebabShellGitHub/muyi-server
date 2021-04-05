@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -204,6 +205,8 @@ public class PicServiceImpl implements PicService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean addPic(BigPicDTO bigPicDTO, MultipartFile file) {
+        LocalDateTime now = LocalDateTime.now();
+
         // 图片名，保存在MyStaticConfig.FOLDER_PIC
         String picFileName = FileSave.save(file, MyStaticConfig.FOLDER_PIC);
         // 保存缩略图，在MyStaticConfig.FOLDER_PIC_THUMB
@@ -221,12 +224,21 @@ public class PicServiceImpl implements PicService {
                 MyStaticConfig.DIR + MyStaticConfig.FOLDER_PIC_WATERMARK + picFileName
         );
         PicBase picBase = bigPicDTO.getPicBase();
-        // 数据库保存缩略图路径
+        // 数据库保存缩略图路径，有带项目里面的路径
+        // 如 pic-watermark/xxx.jpg
         picBase.setPicThumbUrl(MyStaticConfig.FOLDER_PIC_THUMB + picFileName);
+        picBase.setGmtCreate(now);
+        picBase.setGmtModified(now);
+
         PicDtl picDtl = bigPicDTO.getPicDtl();
         // 数据库保存水印原图路径
         picDtl.setPicUrl(MyStaticConfig.FOLDER_PIC_WATERMARK + picFileName);
+        picDtl.setGmtCreate(now);
+        picDtl.setGmtModified(now);
         picBaseMapper.insert(picBase);
+
+        picDtl.setPicId(picBase.getId());
+
         picDtlMapper.insert(picDtl);
 
         return true;

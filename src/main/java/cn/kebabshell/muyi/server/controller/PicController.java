@@ -1,6 +1,7 @@
 package cn.kebabshell.muyi.server.controller;
 
 import cn.kebabshell.muyi.common.dto.BigPicDTO;
+import cn.kebabshell.muyi.common.dto.BigUserDTO;
 import cn.kebabshell.muyi.common.dto.SimplePicDTO;
 import cn.kebabshell.muyi.handler.result.MyMsg;
 import cn.kebabshell.muyi.handler.result.MyResult;
@@ -8,13 +9,12 @@ import cn.kebabshell.muyi.handler.result.ResultCode;
 import cn.kebabshell.muyi.service.PicService;
 import cn.kebabshell.muyi.utils.FileSave;
 import cn.kebabshell.muyi.utils.JWTUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,7 +38,7 @@ public class PicController {
      * @return List<SimplePicDTO>
      */
     @GetMapping("/hm/car")
-    MyResult getCarouselPic(int count){
+    MyResult getCarouselPic(@RequestParam("count") int count){
         log.info("getCarouselPic:count:" + count);
         return new MyResult(
                 ResultCode.SUCCESS,
@@ -121,13 +121,22 @@ public class PicController {
      * @return
      */
     @PostMapping("/add")
-    public MyResult addPic(BigPicDTO bigPicDTO, MultipartFile file) {
-        log.info("addPic:bigPicDTO:" + bigPicDTO);
-        Boolean add = service.addPic(bigPicDTO, file);
+    public MyResult addPic(String bigPicDTO, MultipartFile file) {
+        BigPicDTO dto = JSONObject.parseObject(bigPicDTO, BigPicDTO.class);
+        log.info("addPic:bigPicDTO:" + dto);
+        Boolean add = service.addPic(dto, file);
         return add ?
                 new MyResult(ResultCode.SUCCESS)
                 :
                 new MyResult(ResultCode.ERROR);
+    }
+
+    @PostMapping("/add/test")
+    public MyResult addPicTest(MultipartFile file, String bigPicDTO) {
+        BigPicDTO dto = JSONObject.parseObject(bigPicDTO, BigPicDTO.class);
+        FileSave.save(file, "pic-test/");
+        System.out.println(dto);
+        return new MyResult(ResultCode.SUCCESS);
     }
 
     /**

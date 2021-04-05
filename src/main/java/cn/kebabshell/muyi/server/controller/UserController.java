@@ -54,7 +54,7 @@ public class UserController {
      * @return 只返回token，进入详情页再请求详细信息
      */
     @PostMapping("/login")
-    MyResult login(AuthUser user){
+    MyResult login(@RequestBody AuthUser user){
         log.info("login");
         CtrlServiceDTO<String> login = service.login(user);
         if (login.getSuccess())
@@ -79,6 +79,12 @@ public class UserController {
             log.warn(e.getMessage());
             return new MyResult(ResultCode.REPEATED_USER);
         }
+    }
+
+    @GetMapping("/base")
+    MyResult getUserBase(HttpServletRequest request){
+        String token = request.getHeader("Token");
+        return new MyResult(ResultCode.SUCCESS, service.getUserBase(token));
     }
 
     /**

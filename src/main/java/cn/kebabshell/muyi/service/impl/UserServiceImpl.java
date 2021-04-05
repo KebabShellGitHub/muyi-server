@@ -178,7 +178,7 @@ public class UserServiceImpl implements UserService {
             QueryWrapper<UserBase> userBaseQueryWrapper = new QueryWrapper<>();
             userBaseQueryWrapper
                     .eq("user_name", userName);
-            userBase = userBaseMapper.selectList(userBaseQueryWrapper).get(0);
+            userBase = userBaseMapper.selectOne(userBaseQueryWrapper);
 
             // 有封禁或删除信息，直接返回信息
             if (userBase.getIsBenning() || userBase.getIsDeleted())
@@ -187,7 +187,7 @@ public class UserServiceImpl implements UserService {
 
             QueryWrapper<UserDtl> userDtlQueryWrapper = new QueryWrapper<>();
             userDtlQueryWrapper
-                    .eq("user_name", userBase.getUserName());
+                    .eq("user_id", userBase.getUserId());
             userDtl = userDtlMapper.selectList(userDtlQueryWrapper).get(0);
 
             return new CtrlServiceDTO<>(true, "", new BigUserDTO(null, userBase, userDtl));
@@ -197,7 +197,7 @@ public class UserServiceImpl implements UserService {
             QueryWrapper<UserBase> userBaseQueryWrapper = new QueryWrapper<>();
             userBaseQueryWrapper
                     .eq("user_id", userId);
-            userBase = userBaseMapper.selectList(userBaseQueryWrapper).get(0);
+            userBase = userBaseMapper.selectOne(userBaseQueryWrapper);
 
             // 有封禁或删除信息，直接返回信息
             if (userBase.getIsBenning() || userBase.getIsDeleted())
@@ -210,6 +210,15 @@ public class UserServiceImpl implements UserService {
 
             return new CtrlServiceDTO<>(true, "", new BigUserDTO(null, userBase, userDtl));
         }
+    }
+
+    @Override
+    public UserBase getUserBase(String token) {
+        String userName = JWTUtil.getUserName(token);
+        QueryWrapper<UserBase> userBaseQueryWrapper = new QueryWrapper<>();
+        userBaseQueryWrapper
+                .eq("user_name", userName);
+        return userBaseMapper.selectOne(userBaseQueryWrapper);
     }
 
     @Override

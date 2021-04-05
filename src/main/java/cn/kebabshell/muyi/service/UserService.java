@@ -58,6 +58,12 @@ public interface UserService {
     CtrlServiceDTO<BigUserDTO> getUser(Integer userId, String token);
 
     /**
+     *
+     * @param token
+     * @return
+     */
+    UserBase getUserBase(String token);
+    /**
      * 返回主页热门摄影师信息
      * @return
      */
