@@ -30,6 +30,11 @@ public class UserController {
     @Autowired
     private UserService service;
 
+    @GetMapping("/all")
+    MyResult getAllUsers(int pageNum, int count){
+        return new MyResult(ResultCode.SUCCESS, service.getAllUser(pageNum, count));
+    }
+
     @GetMapping("/auth-test")
     @RequiresRoles("root")
     MyResult testAuth(){
@@ -43,7 +48,7 @@ public class UserController {
      */
     @GetMapping("/hm/hot")
     MyResult getHotAuthor(int count){
-        log.info("getHotAuthor");
+        log.info("getHotAuthor: count:" + count);
         return new MyResult(
                 ResultCode.SUCCESS, service.getHotAuthor(count));
     }
@@ -70,11 +75,12 @@ public class UserController {
      * @return
      */
     @PostMapping("/register")
-    MyResult register(BigUserDTO user) {
-        log.info("register");
+    MyResult register(@RequestBody BigUserDTO user) {
+        log.info("register user:" + user);
         // 失败返回错误信息（用户名重复）
         try {
-            return new MyResult(ResultCode.SUCCESS, service.register(user));
+            service.register(user);
+            return new MyResult(ResultCode.SUCCESS);
         }catch (Exception e){
             log.warn(e.getMessage());
             return new MyResult(ResultCode.REPEATED_USER);

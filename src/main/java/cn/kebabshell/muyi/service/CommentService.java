@@ -10,11 +10,10 @@ import java.util.List;
 
 public interface CommentService {
 
-     Boolean addComment(CommentBase commentBase);
+     CommentDTO addComment(CommentBase commentBase);
 
      Boolean delComment(Integer commentId);
 
      List<CommentDTO> getComment(int picId, int pageNum, int count);
-
 
 }

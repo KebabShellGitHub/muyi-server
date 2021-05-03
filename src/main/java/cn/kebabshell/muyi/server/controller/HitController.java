@@ -5,10 +5,7 @@ import cn.kebabshell.muyi.handler.result.MyResult;
 import cn.kebabshell.muyi.handler.result.ResultCode;
 import cn.kebabshell.muyi.service.HitService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @program: muyi-server
@@ -29,7 +26,7 @@ public class HitController {
      * @return
      */
     @PostMapping("/add")
-    MyResult add(HitBase hitBase){
+    MyResult add(@RequestBody HitBase hitBase){
         service.addPicHit(hitBase);
         return new MyResult(ResultCode.SUCCESS);
     }

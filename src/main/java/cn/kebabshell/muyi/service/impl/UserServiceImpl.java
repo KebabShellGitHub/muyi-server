@@ -3,13 +3,12 @@ package cn.kebabshell.muyi.service.impl;
 import cn.kebabshell.muyi.common.dto.BigUserDTO;
 import cn.kebabshell.muyi.common.dto.CtrlServiceDTO;
 import cn.kebabshell.muyi.common.dto.HotHitDTO;
+import cn.kebabshell.muyi.common.dto.HotHitPicDTO;
 import cn.kebabshell.muyi.common.entity.AuthUser;
+import cn.kebabshell.muyi.common.entity.PicBase;
 import cn.kebabshell.muyi.common.entity.UserBase;
 import cn.kebabshell.muyi.common.entity.UserDtl;
-import cn.kebabshell.muyi.common.mapper.AuthUserMapper;
-import cn.kebabshell.muyi.common.mapper.HitBaseMapper;
-import cn.kebabshell.muyi.common.mapper.UserBaseMapper;
-import cn.kebabshell.muyi.common.mapper.UserDtlMapper;
+import cn.kebabshell.muyi.common.mapper.*;
 import cn.kebabshell.muyi.service.UserService;
 import cn.kebabshell.muyi.utils.JWTUtil;
 import com.alibaba.fastjson.JSON;
@@ -25,8 +24,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -47,21 +48,53 @@ public class UserServiceImpl implements UserService {
     private HitBaseMapper hitBaseMapper;
     @Autowired
     private StringRedisTemplate template;
+    @Autowired
+    private PicBaseMapper picBaseMapper;
 
+
+    @Override
+    public List<BigUserDTO> getAllUser(int pageNum, int count) {
+        LinkedList<BigUserDTO> res = new LinkedList<>();
+        List<AuthUser> users = authUserMapper.selectPage(new Page<>(pageNum, count), null).getRecords();
+
+        for (AuthUser user : users) {
+            Integer userId = user.getId();
+            QueryWrapper<UserBase> userBaseQueryWrapper = new QueryWrapper<>();
+            userBaseQueryWrapper.eq("user_id", userId);
+            UserBase userBase = userBaseMapper.selectOne(userBaseQueryWrapper);
+            QueryWrapper<UserDtl> userDtlQueryWrapper = new QueryWrapper<>();
+            userDtlQueryWrapper.eq("user_id", userId);
+            UserDtl userDtl = userDtlMapper.selectOne(userDtlQueryWrapper);
+            res.add(new BigUserDTO(user, userBase, userDtl));
+        }
+        return res;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String register(BigUserDTO bigUserDTO) {
+        LocalDateTime now = LocalDateTime.now();
         // 拿到三个user信息
         UserBase userBase = bigUserDTO.getUserBase();
         UserDtl userDtl = bigUserDTO.getUserDtl();
         AuthUser authUser = bigUserDTO.getAuthUser();
+
+        userBase.setGmtCreate(now);
+        userBase.setGmtModified(now);
+        userDtl.setGmtCreate(now);
+        userDtl.setGmtModified(now);
+        authUser.setGmtCreate(now);
+        authUser.setGmtModified(now);
+
         // 先插入用户权限表，拿到id
         authUserMapper.insert(authUser);
         Integer userId = authUser.getId();
         // 赋值id
         userBase.setUserId(userId);
+        userBase.setUserAvatarThumbUrl("avatar-thumb/default.png");
+
         userDtl.setUserId(userId);
+        userDtl.setUserAvatarUrl("avatar/default.png");
         // 插入另外两个用户表
         userBaseMapper.insert(userBase);
         userDtlMapper.insert(userDtl);
@@ -227,15 +260,30 @@ public class UserServiceImpl implements UserService {
         if ((listStr = template.opsForValue().get("list:author:hot")) != null){
             return JSONObject.parseArray(listStr, UserBase.class);
         }
-        LinkedList<UserBase> userBases = new LinkedList<>();
-        List<HotHitDTO> list = hitBaseMapper.getHotHit(new Page<>(1, count)).getRecords();
-        for (HotHitDTO hit : list) {
-            QueryWrapper<UserBase> userBaseQueryWrapper = new QueryWrapper<>();
-            userBaseQueryWrapper.eq("user_id", hit.getUid());
-            userBases.push(userBaseMapper.selectList(userBaseQueryWrapper).get(0));
+        LinkedList<UserBase> res = new LinkedList<>();
+        List<HotHitPicDTO> records = hitBaseMapper.getHotPicHit(new Page<>(1, count + 10)).getRecords();
+
+        LinkedHashMap<Integer, UserBase> map = new LinkedHashMap<>();
+        for (HotHitPicDTO record : records) {
+            Integer pid = record.getPid();
+            PicBase picBase = picBaseMapper.selectById(pid);
+            if (picBase != null){
+                QueryWrapper<UserBase> userBaseQueryWrapper = new QueryWrapper<>();
+                userBaseQueryWrapper.eq("user_id", picBase.getPicAuthorId());
+                UserBase userBase = userBaseMapper.selectOne(userBaseQueryWrapper);
+                if (userBase != null){
+                    map.put(userBase.getUserId(), userBase);
+                    if (map.size() == count)
+                        break;
+                }
+            }
         }
-        template.opsForValue().set("list:author:hot", JSON.toJSONString(userBases), 300, TimeUnit.SECONDS);
-        return userBases;
+
+        for (Map.Entry<Integer, UserBase> entry : map.entrySet()) {
+            res.add(entry.getValue());
+        }
+        template.opsForValue().set("list:author:hot", JSON.toJSONString(res), 30, TimeUnit.SECONDS);
+        return res;
     }
 
 }

@@ -9,6 +9,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface UserService {
+
+    List<BigUserDTO> getAllUser(int pageNum, int count);
+
     /**
      * 注册
      * @param bigUserDTO 用户详细信息

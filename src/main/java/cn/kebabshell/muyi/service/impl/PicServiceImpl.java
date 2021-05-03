@@ -62,7 +62,8 @@ public class PicServiceImpl implements PicService {
         picDtlQueryWrapper.eq("pic_id", picId);
         return new BigPicDTO(
                 picBaseMapper.selectById(picId),
-                picDtlMapper.selectOne(picDtlQueryWrapper)
+                picDtlMapper.selectOne(picDtlQueryWrapper),
+                null
         );
     }
 
@@ -83,7 +84,7 @@ public class PicServiceImpl implements PicService {
 
     @Override
     public List<SmallPicDTO> getSortPic(String[] sortName, int pageNum, int count) {
-        if (sortName.length == 0){
+        if (sortName.length == 0) {
             return getAllPic(pageNum, count);
         }
         LinkedList<SmallPicDTO> res = new LinkedList<>();
@@ -121,6 +122,7 @@ public class PicServiceImpl implements PicService {
         // cache
         String hotPicStr;
         if ((hotPicStr = template.opsForValue().get("list:pic:hot:" + pageNum + ":" + count)) != null) {
+            log.info("拿到热门图片（卡片数据）(redis):List<SmallPicDTO>");
             return JSONObject.parseArray(hotPicStr, SmallPicDTO.class);
         }
         // no cache
@@ -164,7 +166,7 @@ public class PicServiceImpl implements PicService {
         // add cache
         template.opsForValue().set(
                 "list:pic:hot:" + pageNum + ":" + count,
-                JSON.toJSONString(res), 300,
+                JSON.toJSONString(res), 30,
                 TimeUnit.SECONDS);
 
         log.info("拿到热门图片（卡片数据）:List<SmallPicDTO>");
@@ -176,6 +178,7 @@ public class PicServiceImpl implements PicService {
         // cache
         String hotPicStr;
         if ((hotPicStr = template.opsForValue().get("list:pic:all:" + pageNum + ":" + count)) != null) {
+            log.info("拿到pageNum:" + pageNum + ",count:" + count + "所有图片（卡片数据）(redis):List<SmallPicDTO>");
             return JSONObject.parseArray(hotPicStr, SmallPicDTO.class);
         }
         // no cache
@@ -210,7 +213,7 @@ public class PicServiceImpl implements PicService {
         // add cache
         template.opsForValue().set(
                 "list:pic:all:" + pageNum + ":" + count,
-                JSON.toJSONString(res), 300,
+                JSON.toJSONString(res), 30,
                 TimeUnit.SECONDS);
 
         log.info("拿到pageNum:" + pageNum + ",count:" + count + "所有图片（卡片数据）:List<SmallPicDTO>");
@@ -256,6 +259,15 @@ public class PicServiceImpl implements PicService {
 
         picDtlMapper.insert(picDtl);
 
+        for (String sort : bigPicDTO.getSorts()) {
+            PicCategory picCategory = new PicCategory();
+            picCategory.setCategoryName(sort);
+            picCategory.setPicId(picBase.getId());
+            picCategory.setGmtCreate(now);
+            picCategory.setGmtModified(now);
+            picCategoryMapper.insert(picCategory);
+        }
+
         return true;
     }
 
@@ -279,32 +291,55 @@ public class PicServiceImpl implements PicService {
         return true;
     }
 
-    private PicStatisticDTO getPicStatistic(Integer picId){
+    @Override
+    public List<SmallPicDTO> getUserPic(Integer userId, int pageNum, int count) {
+        //    private PicBase pic;
+        //     private UserBase author;
+        //     private PicStatisticDTO statistic;
+        //     private List<CategoryBase> categoryBaseList;
+        List<SmallPicDTO> res = new LinkedList<>();
+
+        QueryWrapper<PicBase> picBaseQueryWrapper = new QueryWrapper<>();
+        picBaseQueryWrapper.eq("pic_author_id", userId);
+        List<PicBase> picBases = picBaseMapper.selectPage(new Page<>(pageNum, count), picBaseQueryWrapper).getRecords();
+        for (PicBase picBase : picBases) {
+            UserBase author = getUser(userId);
+            PicStatisticDTO statistic = getPicStatistic(picBase.getId());
+            res.add(new SmallPicDTO(picBase, author, statistic, null));
+        }
+
+        return res;
+    }
+
+    private PicStatisticDTO getPicStatistic(Integer picId) {
         Integer hitCount = getHitCount(picId);
         Integer likeCount = getLikeCount(picId);
         Integer commentCount = getCommentCount(picId);
         return new PicStatisticDTO(hitCount, likeCount, commentCount);
     }
 
-    private int getLikeCount(Integer picId){
+    private int getLikeCount(Integer picId) {
         // 拿到like数量
         QueryWrapper<LikeBase> likeBaseQueryWrapper = new QueryWrapper<>();
         likeBaseQueryWrapper.eq("like_pic_id", picId);
         return likeBaseMapper.selectCount(likeBaseQueryWrapper);
     }
-    private int getCommentCount(Integer picId){
+
+    private int getCommentCount(Integer picId) {
         // 拿到comment数量
         QueryWrapper<CommentBase> commentBaseQueryWrapper = new QueryWrapper<>();
         commentBaseQueryWrapper.eq("comment_pic_id", picId);
         return commentBaseMapper.selectCount(commentBaseQueryWrapper);
     }
-    private int getHitCount(Integer picId){
+
+    private int getHitCount(Integer picId) {
         // 点击数量
         QueryWrapper<HitBase> hitBaseQueryWrapper = new QueryWrapper<>();
         hitBaseQueryWrapper.eq("hit_pic_id", picId);
         return hitBaseMapper.selectCount(hitBaseQueryWrapper);
     }
-    private List<CategoryBase> getCategoryList(Integer picId){
+
+    private List<CategoryBase> getCategoryList(Integer picId) {
         // 拿到所属分类
         // QueryWrapper<CategoryBase> categoryBaseQueryWrapper = new QueryWrapper<>();
         // categoryBaseQueryWrapper
@@ -319,13 +354,14 @@ public class PicServiceImpl implements PicService {
 
         for (PicCategory picCategory : picCategories) {
             CategoryBase categoryBase = categoryBaseMapper.selectById(picCategory.getCategoryId());
-            if (categoryBase != null){
+            if (categoryBase != null) {
                 res.add(categoryBase);
             }
         }
         return res;
     }
-    private UserBase getUser(Integer userId){
+
+    private UserBase getUser(Integer userId) {
         QueryWrapper<UserBase> userBaseQueryWrapper = new QueryWrapper<>();
         userBaseQueryWrapper.eq("user_id", userId);
         return userBaseMapper.selectList(userBaseQueryWrapper).get(0);

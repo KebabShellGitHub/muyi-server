@@ -5,12 +5,10 @@ import cn.kebabshell.muyi.common.entity.LikeBase;
 import cn.kebabshell.muyi.handler.result.MyResult;
 import cn.kebabshell.muyi.handler.result.ResultCode;
 import cn.kebabshell.muyi.service.LikeService;
+import org.apache.ibatis.annotations.Param;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -31,16 +29,16 @@ public class LikeController {
      * @return
      */
     @PostMapping("/add")
-    MyResult add(LikeBase likeBase, HttpServletRequest request){
+    MyResult add(@RequestBody LikeBase likeBase, HttpServletRequest request){
         String token = request.getHeader("Token");
         return service.addLike(likeBase, token) ?
-                new MyResult(ResultCode.SUCCESS)
+                new MyResult(ResultCode.SUCCESS, true)
                 :
-                new MyResult(ResultCode.ERROR);
+                new MyResult(ResultCode.ERROR, false);
     }
 
     @PostMapping("/cancel")
-    MyResult cancel(LikeBase likeBase, HttpServletRequest request){
+    MyResult cancel(@RequestBody LikeBase likeBase, HttpServletRequest request){
         String token = request.getHeader("Token");
         return service.cancelLike(likeBase, token) ?
                 new MyResult(ResultCode.SUCCESS)
@@ -54,5 +52,9 @@ public class LikeController {
     }
 
 
+    @GetMapping("/flag")
+    MyResult likeFlag(Integer userId, Integer picId){
+        return new MyResult(ResultCode.SUCCESS, service.likeFlag(userId, picId));
+    }
 
 }

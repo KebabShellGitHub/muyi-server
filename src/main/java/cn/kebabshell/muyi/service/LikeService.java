@@ -24,4 +24,6 @@ public interface LikeService {
      * @return
      */
     int getLikeCount(Integer picId);
+
+    Boolean likeFlag(Integer userId, Integer picId);
 }

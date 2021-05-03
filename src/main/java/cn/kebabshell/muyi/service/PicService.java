@@ -69,4 +69,11 @@ public interface PicService {
      * @return
      */
     Boolean delPic(String token, Long picId);
+
+    /**
+     *
+     * @param userId
+     * @return
+     */
+    List<SmallPicDTO> getUserPic(Integer userId, int pageNum, int count);
 }

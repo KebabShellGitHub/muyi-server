@@ -31,13 +31,18 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean addComment(CommentBase commentBase) {
+    public CommentDTO addComment(CommentBase commentBase) {
         LocalDateTime now = LocalDateTime.now();
         commentBase.setGmtCreate(now);
         commentBase.setGmtModified(now);
 
         commentBaseMapper.insert(commentBase);
-        return true;
+
+        Integer commentUserId = commentBase.getCommentUserId();
+        QueryWrapper<UserBase> userBaseQueryWrapper = new QueryWrapper<>();
+        userBaseQueryWrapper.eq("user_id", commentUserId);
+        UserBase userBase = userBaseMapper.selectOne(userBaseQueryWrapper);
+        return new CommentDTO(commentBase, userBase);
     }
 
     @Override

@@ -33,6 +33,11 @@ public class PicController {
     @Autowired
     private PicService service;
 
+    @GetMapping("/test")
+    MyResult myTest(Integer id){
+        return new MyResult(ResultCode.SUCCESS, id);
+    }
+
     @GetMapping("/one")
     MyResult getOne(Integer picId){
         return new MyResult(ResultCode.SUCCESS, service.getOne(picId));
@@ -168,12 +173,17 @@ public class PicController {
         }else {
             return new MyResult(ResultCode.SUCCESS);
         }
-
     }
 
+    @GetMapping("/user")
+    MyResult getUserPic(Integer userId, int pageNum, int count){
+        log.info("getUserPic userId:" + userId + ",pageNum:" + pageNum);
+        return new MyResult(ResultCode.SUCCESS, service.getUserPic(userId, pageNum, count));
+    }
 
-
-
-
+    @GetMapping("/bg/all")
+    MyResult getAllPicForRoot(int pageNum, int count){
+        return new MyResult(ResultCode.SUCCESS, service.getAllPic(pageNum, count));
+    }
 
 }

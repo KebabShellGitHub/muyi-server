@@ -20,4 +20,5 @@ import lombok.NoArgsConstructor;
 public class BigPicDTO {
     private PicBase picBase;
     private PicDtl picDtl;
+    private String[] sorts;
 }

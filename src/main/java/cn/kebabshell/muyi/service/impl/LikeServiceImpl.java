@@ -10,6 +10,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 /**
  * @program: muyi-server
  * @description:
@@ -36,6 +38,9 @@ public class LikeServiceImpl implements LikeService {
             if (userBase == null)
                 return false;
         }
+        LocalDateTime now = LocalDateTime.now();
+        likeBase.setGmtCreate(now);
+        likeBase.setGmtModified(now);
         likeBaseMapper.insert(likeBase);
         return true;
     }
@@ -74,5 +79,15 @@ public class LikeServiceImpl implements LikeService {
         likeBaseQueryWrapper
                 .eq("like_pic_id", picId);
         return likeBaseMapper.selectCount(likeBaseQueryWrapper);
+    }
+
+    @Override
+    public Boolean likeFlag(Integer userId, Integer picId) {
+        QueryWrapper<LikeBase> likeBaseQueryWrapper = new QueryWrapper<>();
+        likeBaseQueryWrapper
+                .eq("like_pic_id", picId)
+                .eq("like_user_id", userId);
+        return likeBaseMapper.selectOne(likeBaseQueryWrapper) != null;
+
     }
 }

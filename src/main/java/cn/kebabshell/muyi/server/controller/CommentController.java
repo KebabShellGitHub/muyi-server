@@ -4,14 +4,12 @@ import cn.kebabshell.muyi.common.entity.CommentBase;
 import cn.kebabshell.muyi.handler.result.MyResult;
 import cn.kebabshell.muyi.handler.result.ResultCode;
 import cn.kebabshell.muyi.service.CommentService;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -36,13 +34,10 @@ public class CommentController {
      * @return
      */
     @PostMapping("/add")
-    @RequiresRoles("common")
-    MyResult addComment(CommentBase commentBase){
+    @RequiresPermissions("common")
+    MyResult addComment(@RequestBody CommentBase commentBase){
         log.info("addComment:commentBase:" + commentBase);
-        return service.addComment(commentBase) ?
-                new MyResult(ResultCode.SUCCESS)
-                :
-                new MyResult(ResultCode.ERROR);
+        return new MyResult(ResultCode.SUCCESS, service.addComment(commentBase));
     }
 
     /**
